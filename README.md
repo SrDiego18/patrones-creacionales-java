@@ -105,7 +105,7 @@ classDiagram
         +tasaPreferencial(boolean) Builder
         +build() SolicitudCredito
     }
-    SolicitudCredito +-- Builder
+    SolicitudCredito *-- Builder : clase interna
 ```
 
 Reglas validadas en `build()`: documento de 6 a 12 dígitos; monto entre 500 000 y 500 000 000; plazo de 6 a 120 meses;

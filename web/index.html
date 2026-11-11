@@ -565,8 +565,15 @@ document.querySelectorAll("section[data-pkg]").forEach(sec => {
 const uml = {
   fm: `classDiagram
     direction LR
-    class CreadorNotificacion{<<abstract>> +enviarNotificacion(msg) String +crearNotificacion()* Notificacion}
-    class Notificacion{<<interface>> +enviar(msg) String}
+    class CreadorNotificacion {
+      <<abstract>>
+      +enviarNotificacion(String) String
+      #crearNotificacion()* Notificacion
+    }
+    class Notificacion {
+      <<interface>>
+      +enviar(String) String
+    }
     CreadorNotificacion <|-- CreadorEmail
     CreadorNotificacion <|-- CreadorWhatsApp
     Notificacion <|.. NotificacionEmail
@@ -575,13 +582,29 @@ const uml = {
     CreadorWhatsApp ..> NotificacionWhatsApp : crea`,
   builder: `classDiagram
     direction LR
-    class SolicitudCredito{-solicitante -documento -monto -plazoMeses -codeudor -garantia +builder(...)$ Builder}
-    class Builder{+codeudor(String) Builder +garantia(String) Builder +tasaPreferencial(boolean) Builder +build() SolicitudCredito}
-    SolicitudCredito +-- Builder
+    class SolicitudCredito {
+      -String solicitante
+      -BigDecimal monto
+      -int plazoMeses
+      -String garantia
+      +builder() Builder$
+    }
+    class Builder {
+      +codeudor(String) Builder
+      +garantia(String) Builder
+      +tasaPreferencial(boolean) Builder
+      +build() SolicitudCredito
+    }
+    SolicitudCredito *-- Builder : clase interna
     Builder ..> SolicitudCredito : crea validada`,
   af: `classDiagram
     direction LR
-    class FabricaComponentes{<<interface>> +crearBoton() +crearCuadroTexto() +crearMenu()}
+    class FabricaComponentes {
+      <<interface>>
+      +crearBoton() Boton
+      +crearCuadroTexto() CuadroTexto
+      +crearMenu() Menu
+    }
     FabricaComponentes <|.. FabricaInstitucional
     FabricaComponentes <|.. FabricaAltoContraste
     FormularioLogin --> FabricaComponentes
@@ -590,17 +613,32 @@ const uml = {
     FormularioLogin --> Menu`,
   proto: `classDiagram
     direction LR
-    class Prototipo~T~{<<interface>> +copiar() T}
+    class Prototipo~T~ {
+      <<interface>>
+      +copiar() T
+    }
+    class RegistroPlantillas {
+      +registrar(String, Informe)
+      +crear(String) Informe
+    }
     Prototipo <|.. Informe
     Prototipo <|.. Seccion
     Informe o-- Seccion
-    RegistroPlantillas o-- Informe : prototipos
-    RegistroPlantillas : +crear(nombre) Informe`,
+    RegistroPlantillas o-- Informe`,
   singleton: `classDiagram
     direction LR
-    class Configuracion{<<record>> +urlBaseDatos +maxConexiones +modoPruebas}
-    class ConfiguracionGlobal{<<enum singleton>> INSTANCIA +get() Configuracion}
-    ServicioReportes --> Configuracion : inyectada por constructor
+    class Configuracion {
+      <<record>>
+      +urlBaseDatos
+      +maxConexiones
+      +modoPruebas
+    }
+    class ConfiguracionGlobal {
+      <<enum>>
+      INSTANCIA
+      +get() Configuracion
+    }
+    ServicioReportes --> Configuracion : inyectada
     ConfiguracionGlobal --> Configuracion`
 };
 let mermaidListo = false;
@@ -615,7 +653,7 @@ async function dibujarUml() {
     try {
       const { svg } = await mermaid.render("uml-" + el.dataset.uml, uml[el.dataset.uml]);
       el.innerHTML = svg; el.dataset.ok = "1";
-    } catch (e) { el.dataset.ok = "1"; }
+    } catch (e) { el.dataset.ok = "1"; document.getElementById("duml-" + el.dataset.uml)?.remove(); }
   }
 }
 window.addEventListener("load", dibujarUml);
