@@ -4,6 +4,8 @@
 ![Java 17](https://img.shields.io/badge/Java-17-orange)
 ![JUnit 5](https://img.shields.io/badge/JUnit-5-25A162)
 
+**Integrantes:** Diego Romero · Maicol Rubiano · Camilo Bastidas · Santiago Solano
+
 **🌐 Demo en vivo: https://srdiego18.github.io/patrones-creacionales-java/**
 
 Solución de la guía *Patrones de diseño creacionales en Java* (Patrones y metodologías de desarrollo).
