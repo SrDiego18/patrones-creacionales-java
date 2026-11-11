@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrones creacionales en Java</title>
+<meta name="description" content="Demostración interactiva de Factory Method, Builder, Abstract Factory, Prototype y Singleton en Java, con pruebas JUnit 5 ejecutadas en GitHub Actions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#1b1f24; --muted:#5b6470; --line:#e2e6ea;
+  --accent:#1f5fbf; --accent-soft:#e8f0fc; --ok:#1a7f37; --ok-soft:#e6f4ea; --bad:#c62828; --bad-soft:#fdecea;
+  --term:#1e2127; --term-ink:#d7dae0; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0f1216; --panel:#171b21; --ink:#e6e9ee; --muted:#9aa4b1; --line:#2a313a;
+    --accent:#6ea8ff; --accent-soft:#1a2740; --ok:#4ac26b; --ok-soft:#14301f; --bad:#ff7b72; --bad-soft:#3a1717;
+    --term:#0b0d10; --shadow:none; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,sans-serif}
+a{color:var(--accent)}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.top{background:var(--panel);border-bottom:1px solid var(--line)}
+header.top .wrap{padding-top:28px;padding-bottom:22px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:6px 0 8px}
+.lead{color:var(--muted);max-width:760px;margin:0}
+.status{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-size:13px;text-decoration:none;color:var(--ink)}
+.chip b{font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+nav.tabs{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:8px;padding-bottom:8px;scrollbar-width:none}
+nav.tabs button{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font:600 14px Inter,sans-serif;padding:8px 14px;border-radius:8px;cursor:pointer}
+nav.tabs button[aria-selected=true]{background:var(--accent-soft);color:var(--accent)}
+main{padding:28px 0 60px}
+section.pat{display:none} section.pat.on{display:block}
+.intro{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;margin-bottom:20px}
+@media (max-width:860px){.intro{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.card code{overflow-wrap:anywhere}
+.card button.b{max-width:100%;overflow-wrap:anywhere;text-align:left}
+.card h2{margin:0 0 6px;font-size:22px}
+.card h3{margin:0 0 12px;font-size:16px}
+.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.facts{margin:0;padding:0;list-style:none}
+.facts li{padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.facts li:first-child{border-top:0}
+.facts b{display:block;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;color:var(--muted)}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+input[type=checkbox]{width:auto;margin-right:6px}
+.check{display:flex;align-items:center;font-weight:500;color:var(--ink);margin-top:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+button.b{border:0;border-radius:8px;padding:9px 16px;font:600 14px Inter,sans-serif;cursor:pointer;background:var(--accent);color:#fff}
+button.b.alt{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;font:13px/1.55 "JetBrains Mono",monospace;white-space:pre-wrap;word-break:break-word;min-height:120px;max-height:420px;overflow:auto;margin:0}
+.term .ok{color:#98c379} .term .bad{color:#ff7b72} .term .dim{color:#7f8792} .term .hl{color:#e5c07b}
+.note{font-size:13px;color:var(--muted);margin:8px 0 0}
+.msg{border-radius:8px;padding:10px 12px;font-size:14px;margin-top:12px}
+.msg.ok{background:var(--ok-soft);color:var(--ok)} .msg.bad{background:var(--bad-soft);color:var(--bad)}
+details.code{margin-top:20px}
+details.code summary{cursor:pointer;font-weight:600;padding:12px 0}
+.files{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.files button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:4px 10px;font:12px "JetBrains Mono",monospace;cursor:pointer}
+.files button.on{border-color:var(--accent);color:var(--accent)}
+pre.src{margin:0;border:1px solid var(--line);border-radius:10px;max-height:520px;overflow:auto;font-size:13px}
+pre.src code{padding:14px 16px!important;display:block}
+.uml{overflow-x:auto;text-align:center}
+.uml svg{max-width:100%;height:auto}
+/* Abstract Factory: componentes visuales reales */
+.ui-demo{border-radius:12px;padding:20px;transition:all .25s}
+.ui-demo .menu{display:flex;gap:6px;margin-bottom:14px}
+.ui-demo .menu span{padding:6px 12px;border-radius:6px;font-size:14px}
+.ui-demo input{margin-bottom:12px}
+.ui-demo button{width:100%;padding:11px;border-radius:8px;font:600 15px Inter,sans-serif;cursor:pointer}
+.tema-institucional{background:#f3f6fb;border:1px solid #c9d6ea}
+.tema-institucional .menu span{background:#003A70;color:#fff}
+.tema-institucional input{background:#fff;border:1px solid #9aa7b8;color:#1b1f24}
+.tema-institucional button{background:#003A70;color:#fff;border:0}
+.tema-alto_contraste{background:#000;border:3px solid #ffd600}
+.tema-alto_contraste .menu span{background:#000;color:#ffd600;border:2px solid #ffd600;font-weight:700;text-transform:uppercase}
+.tema-alto_contraste input{background:#000;border:3px solid #fff;color:#fff;font-size:17px}
+.tema-alto_contraste button{background:#ffd600;color:#000;border:3px solid #fff;text-transform:uppercase;font-size:17px}
+.copies{display:grid;gap:8px;margin-top:12px}
+.copy{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;background:var(--bg)}
+.copy.proto{border-color:var(--accent)}
+.copy.danger{border-color:var(--bad);background:var(--bad-soft)}
+.counter{font:600 28px "JetBrains Mono",monospace}
+table.tests{width:100%;border-collapse:collapse;font-size:14px}
+table.tests td{padding:7px 8px;border-top:1px solid var(--line);vertical-align:top}
+table.tests td:first-child{width:28px}
+.suite{margin-bottom:18px}
+.suite h3{display:flex;justify-content:space-between;gap:10px;font-size:15px;margin:0 0 6px}
+.ok-ic{color:var(--ok);font-weight:700} .bad-ic{color:var(--bad);font-weight:700}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+@media (max-width:640px){.big{grid-template-columns:1fr}}
+.big .card{text-align:center}
+.big .n{font:700 34px "JetBrains Mono",monospace}
+footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Patrones y metodologías de desarrollo · Guía del estudiante</div>
+    <h1>Patrones de diseño creacionales en Java</h1>
+    <p class="lead">Los cinco patrones GoF implementados en Java 17 y probados con JUnit 5. Cada pestaña tiene una demostración que puedes usar, la salida real del programa Java y su código fuente.</p>
+    <div class="status">
+      <a class="chip" id="chip-tests" href="#" data-tab="pruebas"><span class="dot"></span><span>Cargando pruebas…</span></a>
+      <span class="chip" id="chip-cov"><span class="dot"></span><span>Cobertura</span></span>
+      <a class="chip" href="https://github.com/SrDiego18/patrones-creacionales-java" target="_blank" rel="noopener"><b>GitHub</b> SrDiego18/patrones-creacionales-java</a>
+      <a class="chip" href="Guia_patrones_creacionales_resuelta.docx"><b>Guía resuelta</b> .docx</a>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Patrones">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="fm" aria-selected="true">Factory Method</button>
+    <button role="tab" data-tab="builder">Builder</button>
+    <button role="tab" data-tab="af">Abstract Factory</button>
+    <button role="tab" data-tab="proto">Prototype</button>
+    <button role="tab" data-tab="singleton">Singleton vs. DI</button>
+    <button role="tab" data-tab="pruebas">Pruebas</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================== FACTORY METHOD ===================== -->
+<section class="pat on" id="fm" data-pkg="factorymethod">
+  <div class="intro">
+    <div class="card">
+      <span class="tag">Laboratorio · sección 6</span>
+      <h2>Factory Method</h2>
+      <p>El servicio original decidía con <code>if/else</code> qué clase instanciar y había que modificarlo con cada canal nuevo. Ahora <code>CreadorNotificacion.enviarNotificacion()</code> es <code>final</code> y solo usa la interfaz <code>Notificacion</code>. Cada subclase redefine <code>crearNotificacion()</code> para decidir el producto concreto.</p>
+      <div class="uml" data-uml="fm"></div>
+    </div>
+    <div class="card">
+      <ul class="facts">
+        <li><b>Problema</b>Crear notificaciones sin que la lógica de envío conozca las clases concretas.</li>
+        <li><b>Agregar un canal</b>Dos clases nuevas (<code>NotificacionX</code> y <code>CreadorX</code>) y una línea en <code>SelectorCreador</code>. No se modifica ninguna clase existente.</li>
+        <li><b>Extra</b><code>SelectorCreador</code> y el enum <code>Canal</code> eliminan las cadenas mágicas, así el cliente ya no menciona creadores concretos.</li>
+        <li><b>Costo</b>Una subclase creadora por producto.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Pruébalo</h3>
+      <label for="fm-canal">Canal</label>
+      <select id="fm-canal"></select>
+      <label for="fm-msg">Mensaje</label>
+      <input id="fm-msg" value="Su solicitud fue recibida">
+      <div class="btns">
+        <button class="b" id="fm-send">enviarNotificacion()</button>
+        <button class="b alt" id="fm-all">Enviar por todos los canales</button>
+        <button class="b alt" id="fm-clear">Limpiar</button>
+      </div>
+      <p class="note">La simulación usa la misma lógica y las mismas validaciones que el código Java.</p>
+    </div>
+    <div class="card">
+      <h3>Consola</h3>
+      <pre class="term" id="fm-out"></pre>
+    </div>
+  </div>
+  <div class="card"><h3>Salida real del programa Java <span class="note">(<code>DemoFactoryMethod</code>, ejecutado por GitHub Actions)</span></h3><pre class="term" data-salida="factorymethod">Cargando…</pre></div>
+  <details class="code card"><summary>Ver código fuente</summary><div class="files"></div><pre class="src"><code class="language-java"></code></pre></details>
+</section>
+
+<!-- ===================== BUILDER ===================== -->
+<section class="pat" id="builder" data-pkg="builder">
+  <div class="intro">
+    <div class="card">
+      <span class="tag">Caso A · Trabajo autónomo</span>
+      <h2>Builder</h2>
+      <p>Una solicitud de crédito tiene campos obligatorios y opcionales, y combinaciones que hay que validar. El builder pide los obligatorios al inicio, los opcionales con métodos encadenados y valida todo en <code>build()</code>. Así nunca existe una solicitud inválida, y el objeto resultante es inmutable.</p>
+      <div class="uml" data-uml="builder"></div>
+    </div>
+    <div class="card">
+      <ul class="facts">
+        <li><b>Reglas</b>Documento de 6 a 12 dígitos · monto entre 500 000 y 500 000 000 · plazo de 6 a 120 meses · más de 50 000 000 exige codeudor o garantía · tasa preferencial solo con garantía.</li>
+        <li><b>Alternativa descartada</b>Un constructor de 8 parámetros (fácil confundir el orden) y los <em>setters</em> JavaBeans, que permiten estados inválidos.</li>
+        <li><b>Costo</b>Los campos se duplican en el objeto y en el builder.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Pruébalo</h3>
+      <div class="row">
+        <div><label for="b-sol">Solicitante *</label><input id="b-sol" value="Ana Pérez"></div>
+        <div><label for="b-doc">Documento *</label><input id="b-doc" value="1020304050" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label for="b-monto">Monto *</label><input id="b-monto" value="60000000" inputmode="numeric"></div>
+        <div><label for="b-plazo">Plazo (meses) *</label><input id="b-plazo" value="36" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label for="b-cod">Codeudor</label><input id="b-cod" placeholder="opcional"></div>
+        <div><label for="b-gar">Garantía</label><input id="b-gar" placeholder="opcional"></div>
+      </div>
+      <label for="b-desc">Descripción</label><input id="b-desc" placeholder="opcional">
+      <label class="check"><input type="checkbox" id="b-tasa">Tasa preferencial</label>
+      <div class="btns"><button class="b" id="b-build">build()</button></div>
+      <div id="b-msg"></div>
+      <p class="note">Prueba con 60 000 000 sin codeudor: el builder lo rechaza. Luego agrega una garantía.</p>
+    </div>
+    <div class="card">
+      <h3>Código equivalente</h3>
+      <pre class="term" id="b-code"></pre>
+    </div>
+  </div>
+  <div class="card"><h3>Salida real del programa Java <span class="note">(<code>DemoBuilder</code>)</span></h3><pre class="term" data-salida="builder">Cargando…</pre></div>
+  <details class="code card"><summary>Ver código fuente</summary><div class="files"></div><pre class="src"><code class="language-java"></code></pre></details>
+</section>
+
+<!-- ===================== ABSTRACT FACTORY ===================== -->
+<section class="pat" id="af" data-pkg="abstractfactory">
+  <div class="intro">
+    <div class="card">
+      <span class="tag">Caso B · Trabajo autónomo</span>
+      <h2>Abstract Factory</h2>
+      <p>Botones, cuadros de texto y menús deben pertenecer todos al mismo tema. Cada fábrica crea la <strong>familia completa</strong>, y el cliente <code>FormularioLogin</code> solo conoce las interfaces. Por eso es imposible mezclar componentes de temas distintos.</p>
+      <div class="uml" data-uml="af"></div>
+    </div>
+    <div class="card">
+      <ul class="facts">
+        <li><b>Agregar un tema</b>Una fábrica nueva. Las pantallas no cambian.</li>
+        <li><b>Limitación</b>Agregar un <em>tipo</em> de componente obliga a modificar la interfaz y todas las fábricas.</li>
+        <li><b>Alternativa descartada</b>Un Factory Method por componente, que no garantiza la coherencia de la familia.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Pruébalo: cambia la fábrica</h3>
+      <div class="btns" id="af-btns"></div>
+      <div style="margin-top:16px" class="ui-demo" id="af-ui">
+        <div class="menu"><span>Inicio</span><span>Ayuda</span></div>
+        <input aria-label="Usuario" value="usuario@correo.com">
+        <button type="button">Ingresar</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Lo que produce <code>FormularioLogin.dibujar()</code></h3>
+      <pre class="term" id="af-out"></pre>
+    </div>
+  </div>
+  <div class="card"><h3>Salida real del programa Java <span class="note">(<code>DemoAbstractFactory</code>)</span></h3><pre class="term" data-salida="abstractfactory">Cargando…</pre></div>
+  <details class="code card"><summary>Ver código fuente</summary><div class="files"></div><pre class="src"><code class="language-java"></code></pre></details>
+</section>
+
+<!-- ===================== PROTOTYPE ===================== -->
+<section class="pat" id="proto" data-pkg="prototype">
+  <div class="intro">
+    <div class="card">
+      <span class="tag">Caso C · Extra</span>
+      <h2>Prototype</h2>
+      <p>Inicializar el informe base es costoso. Se hace <strong>una sola vez</strong>, se guarda en un registro y cada informe nuevo es una <strong>copia profunda</strong> que se ajusta. Se usa un constructor de copia en lugar de <code>clone()</code> (Bloch, Item 13).</p>
+      <div class="uml" data-uml="proto"></div>
+    </div>
+    <div class="card">
+      <ul class="facts">
+        <li><b>Pregunta 10 de la guía</b>Con una copia superficial, el original y la copia comparten las mismas secciones, así que cambiar una afecta a la otra. Actívala abajo para verlo.</li>
+        <li><b>Solución</b>Copiar en profundidad las partes mutables (listas y secciones).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Pruébalo</h3>
+      <label for="p-dest">Destinatario de la copia</label>
+      <input id="p-dest" value="Gerencia Bogotá">
+      <label for="p-conc">Nuevo texto de "Conclusiones"</label>
+      <input id="p-conc" value="Recomendaciones para Bogotá">
+      <label class="check"><input type="checkbox" id="p-shallow">Usar copia superficial (incorrecta)</label>
+      <div class="btns"><button class="b" id="p-copy">registro.crear("trimestral")</button><button class="b alt" id="p-reset">Reiniciar</button></div>
+      <p class="note">Inicializaciones costosas ejecutadas:</p>
+      <div class="counter" id="p-count">1</div>
+    </div>
+    <div class="card">
+      <h3>Prototipo y copias</h3>
+      <div class="copies" id="p-list"></div>
+    </div>
+  </div>
+  <div class="card"><h3>Salida real del programa Java <span class="note">(<code>DemoPrototype</code>)</span></h3><pre class="term" data-salida="prototype">Cargando…</pre></div>
+  <details class="code card"><summary>Ver código fuente</summary><div class="files"></div><pre class="src"><code class="language-java"></code></pre></details>
+</section>
+
+<!-- ===================== SINGLETON ===================== -->
+<section class="pat" id="singleton" data-pkg="singleton">
+  <div class="intro">
+    <div class="card">
+      <span class="tag">Caso D · Extra</span>
+      <h2>Singleton frente a inyección de dependencias</h2>
+      <p>Se evaluó Singleton, implementado como <code>enum</code> (thread-safe, Bloch Item 3), pero se eligió una <strong>configuración inmutable</strong> (<code>record</code>) que se crea una vez y se <strong>inyecta por constructor</strong>. Sigue habiendo un solo objeto, pero la dependencia es explícita y en las pruebas se puede pasar otra configuración.</p>
+      <div class="uml" data-uml="singleton"></div>
+    </div>
+    <div class="card">
+      <ul class="facts">
+        <li><b>Problema de Singleton</b>Estado global y dependencias ocultas (<code>getInstance()</code> dentro de los métodos), que dificultan las pruebas (pregunta 11).</li>
+        <li><b>Cuándo sí usarlo</b>Cuando hace falta garantizar una sola instancia y no existe un punto de arranque desde donde inyectarla.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Pruébalo: inyecta una configuración</h3>
+      <label for="s-url">db.url</label><input id="s-url" value="jdbc:postgresql://db.produccion:5432/ventas">
+      <label for="s-max">db.maxConexiones (1–100)</label><input id="s-max" value="20" inputmode="numeric">
+      <label class="check"><input type="checkbox" id="s-test">modoPruebas</label>
+      <div class="btns"><button class="b" id="s-run">new ServicioReportes(config).generar("ventas-q3")</button></div>
+      <div class="btns"><button class="b alt" id="s-threads">Singleton: pedir la instancia desde 100 hilos</button></div>
+    </div>
+    <div class="card"><h3>Consola</h3><pre class="term" id="s-out"></pre></div>
+  </div>
+  <div class="card"><h3>Salida real del programa Java <span class="note">(<code>DemoSingleton</code>)</span></h3><pre class="term" data-salida="singleton">Cargando…</pre></div>
+  <details class="code card"><summary>Ver código fuente</summary><div class="files"></div><pre class="src"><code class="language-java"></code></pre></details>
+</section>
+
+<!-- ===================== PRUEBAS ===================== -->
+<section class="pat" id="pruebas">
+  <div class="big">
+    <div class="card"><div class="n" id="t-total">—</div><div class="note">pruebas JUnit 5</div></div>
+    <div class="card"><div class="n" id="t-fail">—</div><div class="note">fallos</div></div>
+    <div class="card"><div class="n" id="t-cov">—</div><div class="note">cobertura de líneas (JaCoCo)</div></div>
+  </div>
+  <div class="card">
+    <h3>Resultados de la última ejecución en GitHub Actions</h3>
+    <p class="note" id="t-meta"></p>
+    <div id="t-suites" style="margin-top:14px"></div>
+    <p class="note"><a href="cobertura/index.html">Ver el reporte completo de cobertura</a></p>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Diego Hernán Romero · <a href="https://github.com/SrDiego18">@SrDiego18</a> · Referencias: Gamma et al. (1994) <em>Design Patterns</em>; Bloch (2018) <em>Effective Java</em>; Freeman et al. (2004) <em>Head First Design Patterns</em>.</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n.toLocaleString("es-CO");
+
+/* ---------- Pestañas ---------- */
+const tabs = [...document.querySelectorAll("nav.tabs button")];
+function abrir(id, push = true) {
+  tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.tab === id));
+  document.querySelectorAll("section.pat").forEach(s => s.classList.toggle("on", s.id === id));
+  if (push) history.replaceState(null, "", "#" + id);
+  dibujarUml();
+}
+tabs.forEach(t => t.addEventListener("click", () => abrir(t.dataset.tab)));
+$("#chip-tests").addEventListener("click", e => { e.preventDefault(); abrir("pruebas"); window.scrollTo({top:0}); });
+const inicial = location.hash.slice(1);
+if (document.getElementById(inicial)) abrir(inicial, false);
+
+/* ---------- Factory Method (misma lógica que el código Java) ---------- */
+const creadores = {
+  EMAIL:    { creador: "CreadorEmail",    producto: "NotificacionEmail",    prefijo: "Email" },
+  SMS:      { creador: "CreadorSMS",      producto: "NotificacionSMS",      prefijo: "SMS" },
+  WHATSAPP: { creador: "CreadorWhatsApp", producto: "NotificacionWhatsApp", prefijo: "WhatsApp" },
+  PUSH:     { creador: "CreadorPush",     producto: "NotificacionPush",     prefijo: "Push" }
+};
+$("#fm-canal").innerHTML = Object.keys(creadores).map(c => `<option>${c}</option>`).join("");
+$("#fm-canal").value = "WHATSAPP";
+const fmOut = $("#fm-out");
+function enviar(canal, mensaje) {
+  const c = creadores[canal];
+  let html = `<span class="dim">SelectorCreador.para(Canal.${canal}) → new ${c.creador}()</span>\n`;
+  if (mensaje == null || mensaje.trim() === "") {
+    return html + `<span class="bad">IllegalArgumentException: El mensaje no puede estar vacío</span>\n`;
+  }
+  html += `<span class="dim">crearNotificacion() → new ${c.producto}()</span>\n`;
+  return html + `<span class="ok">${esc(c.prefijo + ": " + mensaje.trim())}</span>\n`;
+}
+$("#fm-send").onclick = () => { fmOut.innerHTML += enviar($("#fm-canal").value, $("#fm-msg").value); fmOut.scrollTop = 1e9; };
+$("#fm-all").onclick = () => { Object.keys(creadores).forEach(c => fmOut.innerHTML += enviar(c, $("#fm-msg").value)); fmOut.scrollTop = 1e9; };
+$("#fm-clear").onclick = () => fmOut.innerHTML = "";
+
+/* ---------- Builder ---------- */
+const MIN = 500000, MAX = 500000000, UMBRAL = 50000000;
+function construir(d) {
+  const limpiar = v => (v == null || v.trim() === "") ? null : v.trim();
+  const sol = limpiar(d.solicitante), doc = limpiar(d.documento);
+  const monto = Number(String(d.monto).replace(/[^\d.-]/g, ""));
+  const plazo = Number(d.plazo);
+  const cod = limpiar(d.codeudor), gar = limpiar(d.garantia);
+  if (!sol) throw "El solicitante es obligatorio";
+  if (!doc || !/^\d{6,12}$/.test(doc)) throw "El documento debe tener entre 6 y 12 dígitos";
+  if (!Number.isFinite(monto) || monto < MIN || monto > MAX) throw `El monto debe estar entre ${MIN} y ${MAX}`;
+  if (!Number.isInteger(plazo) || plazo < 6 || plazo > 120) throw "El plazo debe estar entre 6 y 120 meses";
+  if (monto > UMBRAL && !cod && !gar) throw `Montos mayores a ${UMBRAL} requieren codeudor o garantía`;
+  if (d.tasa && !gar) throw "La tasa preferencial solo aplica con garantía";
+  return { sol, doc, monto, plazo, cod, gar, desc: limpiar(d.descripcion), tasa: d.tasa };
+}
+function leerBuilder() {
+  return { solicitante: $("#b-sol").value, documento: $("#b-doc").value, monto: $("#b-monto").value,
+    plazo: $("#b-plazo").value, codeudor: $("#b-cod").value, garantia: $("#b-gar").value,
+    descripcion: $("#b-desc").value, tasa: $("#b-tasa").checked };
+}
+function codigoBuilder() {
+  const d = leerBuilder(), q = v => JSON.stringify(v.trim());
+  let s = `SolicitudCredito s = SolicitudCredito\n    .builder(${q(d.solicitante)}, ${q(d.documento)},\n             new BigDecimal(${q(String(d.monto).replace(/[^\d.-]/g,""))}), ${d.plazo.trim() || 0})`;
+  if (d.codeudor.trim()) s += `\n    .codeudor(${q(d.codeudor)})`;
+  if (d.garantia.trim()) s += `\n    .garantia(${q(d.garantia)})`;
+  if (d.descripcion.trim()) s += `\n    .descripcion(${q(d.descripcion)})`;
+  if (d.tasa) s += `\n    .tasaPreferencial(true)`;
+  $("#b-code").textContent = s + "\n    .build();";
+}
+document.querySelectorAll("#builder input").forEach(i => i.addEventListener("input", codigoBuilder));
+$("#b-build").onclick = () => {
+  try {
+    const s = construir(leerBuilder());
+    $("#b-msg").innerHTML = `<div class="msg ok"><b>Solicitud creada</b><br>${esc(s.sol)} · doc ${esc(s.doc)} · $${fmt(s.monto)} a ${s.plazo} meses`
+      + (s.cod ? ` · codeudor: ${esc(s.cod)}` : "") + (s.gar ? ` · garantía: ${esc(s.gar)}` : "") + (s.tasa ? " · tasa preferencial" : "") + `</div>`;
+  } catch (e) {
+    $("#b-msg").innerHTML = `<div class="msg bad"><b>IllegalStateException</b><br>${esc(e)}</div>`;
+  }
+};
+codigoBuilder();
+
+/* ---------- Abstract Factory ---------- */
+const fabricas = {
+  INSTITUCIONAL: { clase: "FabricaInstitucional",
+    dibujar: () => ["[Menú marca | Inicio · Ayuda]", "[Texto borde gris | usuario@correo.com]", "[Botón azul #003A70 | Ingresar]"] },
+  ALTO_CONTRASTE: { clase: "FabricaAltoContraste",
+    dibujar: () => ["[MENÚ ALTO CONTRASTE | Inicio / Ayuda]", "[TEXTO BORDE GRUESO | usuario@correo.com]", "[BOTÓN NEGRO/AMARILLO | INGRESAR]"] }
+};
+function usarFabrica(tema) {
+  const f = fabricas[tema];
+  $("#af-ui").className = "ui-demo tema-" + tema.toLowerCase();
+  document.querySelectorAll("#af-btns button").forEach(b => b.className = "b" + (b.dataset.t === tema ? "" : " alt"));
+  $("#af-out").innerHTML = `<span class="dim">new FormularioLogin(FabricaComponentes.para(Tema.${tema}))\n→ ${f.clase}: crearMenu(), crearCuadroTexto(), crearBoton()</span>\n\n`
+    + f.dibujar().map(esc).join("\n") + `\n\n<span class="ok">esConsistente() = true</span>  <span class="dim">(los 3 componentes son del tema ${tema})</span>`;
+}
+$("#af-btns").innerHTML = Object.keys(fabricas).map(t => `<button class="b alt" data-t="${t}">${fabricas[t].clase}</button>`).join("");
+document.querySelectorAll("#af-btns button").forEach(b => b.onclick = () => usarFabrica(b.dataset.t));
+usarFabrica("INSTITUCIONAL");
+
+/* ---------- Prototype ---------- */
+let inicializaciones, prototipo, copias;
+function cargarInformeTrimestral() {
+  inicializaciones++;
+  return { titulo: "Informe trimestral", destinatario: "", secciones: [
+    { titulo: "Resumen", contenido: "Indicadores consolidados del trimestre" },
+    { titulo: "Ventas", contenido: "Tabla de ventas por región" },
+    { titulo: "Conclusiones", contenido: "Pendiente" }] };
+}
+const copiaProfunda = i => ({ ...i, secciones: i.secciones.map(s => ({ ...s })) });
+const copiaSuperficial = i => ({ ...i }); // comparte el arreglo y las secciones
+function reiniciarProto() { inicializaciones = 0; prototipo = cargarInformeTrimestral(); copias = []; pintarProto(); }
+function pintarProto() {
+  $("#p-count").textContent = inicializaciones;
+  const alterado = prototipo.secciones[2].contenido !== "Pendiente";
+  let h = `<div class="copy proto ${alterado ? "danger" : ""}"><b>Prototipo registrado</b><br>Conclusiones: <code>${esc(prototipo.secciones[2].contenido)}</code>`
+    + (alterado ? `<br><b>⚠ El prototipo fue modificado por una copia superficial.</b>` : "") + `</div>`;
+  h += copias.map((c, i) => `<div class="copy"><b>Copia ${i + 1}</b> para ${esc(c.destinatario)} ${c.superficial ? "<span class='note'>(superficial)</span>" : ""}<br>Conclusiones: <code>${esc(c.secciones[2].contenido)}</code></div>`).join("");
+  $("#p-list").innerHTML = h;
+}
+$("#p-copy").onclick = () => {
+  const superficial = $("#p-shallow").checked;
+  const c = superficial ? copiaSuperficial(prototipo) : copiaProfunda(prototipo);
+  c.destinatario = $("#p-dest").value; c.superficial = superficial;
+  c.secciones[2].contenido = $("#p-conc").value;
+  copias.push(c); pintarProto();
+};
+$("#p-reset").onclick = reiniciarProto;
+reiniciarProto();
+
+/* ---------- Singleton vs DI ---------- */
+const sOut = $("#s-out");
+$("#s-run").onclick = () => {
+  const url = $("#s-url").value.trim(), max = Number($("#s-max").value), pruebas = $("#s-test").checked;
+  let h = `<span class="dim">new Configuracion(${esc(JSON.stringify(url))}, ${esc($("#s-max").value)}, ${pruebas})</span>\n`;
+  if (!url.startsWith("jdbc:")) h += `<span class="bad">IllegalArgumentException: La URL debe iniciar con jdbc:</span>\n`;
+  else if (!Number.isInteger(max) || max < 1 || max > 100) h += `<span class="bad">IllegalArgumentException: maxConexiones debe estar entre 1 y 100</span>\n`;
+  else h += `<span class="ok">Reporte 'ventas-q3' guardado en ${esc(pruebas ? "memoria (modo pruebas)" : url)} usando hasta ${max} ${max === 1 ? "conexión" : "conexiones"}</span>\n`;
+  sOut.innerHTML += h + "\n"; sOut.scrollTop = 1e9;
+};
+$("#s-threads").onclick = () => {
+  const ids = new Set(Array.from({ length: 100 }, () => "ConfiguracionGlobal.INSTANCIA@1b6d3586"));
+  sOut.innerHTML += `<span class="dim">100 tareas en un pool de 8 hilos llaman ConfiguracionGlobal.INSTANCIA.get()</span>\n`
+    + `<span class="ok">Instancias distintas obtenidas: ${ids.size}</span>  <span class="dim">(prueba singletonThreadSafe en JUnit)</span>\n\n`;
+  sOut.scrollTop = 1e9;
+};
+
+/* ---------- Salida real, código y pruebas (generados por GitHub Actions) ---------- */
+function colorear(texto) {
+  return esc(texto)
+    .replace(/^(---.*---)$/gm, '<span class="hl">$1</span>')
+    .replace(/^(Rechazada:.*)$/gm, '<span class="bad">$1</span>')
+    .replace(/^(Creada:.*|Prototipo intacto:.*|Misma instancia: true)$/gm, '<span class="ok">$1</span>');
+}
+document.querySelectorAll("[data-salida]").forEach(async pre => {
+  try {
+    const r = await fetch(`salidas/${pre.dataset.salida}.txt`, { cache: "no-store" });
+    if (!r.ok) throw 0;
+    pre.innerHTML = `<span class="dim">$ java patrones.${pre.dataset.salida}.Demo…</span>\n` + colorear(await r.text());
+  } catch { pre.textContent = "La salida se genera al publicar el sitio con GitHub Actions."; }
+});
+
+const archivos = {
+  factorymethod: ["Notificacion.java","CreadorNotificacion.java","CreadorWhatsApp.java","NotificacionWhatsApp.java","Canal.java","SelectorCreador.java","antes/ServicioNotificacionesOriginal.java"],
+  builder: ["SolicitudCredito.java","DemoBuilder.java"],
+  abstractfactory: ["FabricaComponentes.java","FabricaInstitucional.java","FabricaAltoContraste.java","FormularioLogin.java","Boton.java","Tema.java"],
+  prototype: ["Prototipo.java","Informe.java","Seccion.java","RegistroPlantillas.java","CargadorPlantillas.java"],
+  singleton: ["Configuracion.java","ServicioReportes.java","ConfiguracionGlobal.java"]
+};
+document.querySelectorAll("section[data-pkg]").forEach(sec => {
+  const pkg = sec.dataset.pkg, box = sec.querySelector(".files"), code = sec.querySelector("pre.src code");
+  async function ver(nombre) {
+    box.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.f === nombre));
+    try {
+      const r = await fetch(`codigo/${pkg}/${nombre}`);
+      if (!r.ok) throw 0;
+      code.textContent = await r.text();
+      code.removeAttribute("data-highlighted");
+      if (window.hljs) hljs.highlightElement(code);
+    } catch { code.textContent = "El código se publica junto con el sitio. También está en el repositorio de GitHub."; }
+  }
+  box.innerHTML = archivos[pkg].map(f => `<button data-f="${f}">${f}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => ver(b.dataset.f));
+  sec.querySelector("details").addEventListener("toggle", e => { if (e.target.open && !code.textContent) ver(archivos[pkg][0]); });
+});
+
+(async () => {
+  const chip = $("#chip-tests"), cov = $("#chip-cov");
+  try {
+    const r = await fetch("pruebas.json", { cache: "no-store" });
+    if (!r.ok) throw 0;
+    const d = await r.json(), ok = d.fallos === 0;
+    chip.innerHTML = `<span class="dot ${ok ? "ok" : "bad"}"></span><span><b>${d.total - d.fallos}/${d.total}</b> pruebas pasan</span>`;
+    cov.innerHTML = `<span class="dot ok"></span><span>Cobertura <b>${d.cobertura_lineas ?? "—"}%</b></span>`;
+    $("#t-total").textContent = d.total;
+    $("#t-fail").textContent = d.fallos;
+    $("#t-cov").textContent = d.cobertura_lineas != null ? d.cobertura_lineas + "%" : "—";
+    $("#t-meta").innerHTML = `Commit <code>${esc(d.commit)}</code> · ${new Date(d.fecha).toLocaleString("es-CO")} · <a href="${esc(d.ejecucion)}" target="_blank" rel="noopener">ver ejecución en GitHub Actions</a>`;
+    $("#t-suites").innerHTML = d.clases.map(c => `<div class="suite"><h3><span>${esc(c.clase)}</span><span class="${c.fallos ? "bad-ic" : "ok-ic"}">${c.total - c.fallos}/${c.total}</span></h3>
+      <table class="tests">${c.casos.map(t => `<tr><td class="${t.ok ? "ok-ic" : "bad-ic"}">${t.ok ? "✓" : "✗"}</td><td>${esc(t.nombre)}</td></tr>`).join("")}</table></div>`).join("");
+  } catch {
+    chip.innerHTML = `<span class="dot"></span><span>Resultados disponibles al publicar</span>`;
+    cov.style.display = "none";
+  }
+})();
+
+/* ---------- Diagramas UML (Mermaid) ---------- */
+const uml = {
+  fm: `classDiagram
+    direction LR
+    class CreadorNotificacion{<<abstract>> +enviarNotificacion(msg) String +crearNotificacion()* Notificacion}
+    class Notificacion{<<interface>> +enviar(msg) String}
+    CreadorNotificacion <|-- CreadorEmail
+    CreadorNotificacion <|-- CreadorWhatsApp
+    Notificacion <|.. NotificacionEmail
+    Notificacion <|.. NotificacionWhatsApp
+    CreadorNotificacion ..> Notificacion : usa
+    CreadorWhatsApp ..> NotificacionWhatsApp : crea`,
+  builder: `classDiagram
+    direction LR
+    class SolicitudCredito{-solicitante -documento -monto -plazoMeses -codeudor -garantia +builder(...)$ Builder}
+    class Builder{+codeudor(String) Builder +garantia(String) Builder +tasaPreferencial(boolean) Builder +build() SolicitudCredito}
+    SolicitudCredito +-- Builder
+    Builder ..> SolicitudCredito : crea validada`,
+  af: `classDiagram
+    direction LR
+    class FabricaComponentes{<<interface>> +crearBoton() +crearCuadroTexto() +crearMenu()}
+    FabricaComponentes <|.. FabricaInstitucional
+    FabricaComponentes <|.. FabricaAltoContraste
+    FormularioLogin --> FabricaComponentes
+    FormularioLogin --> Boton
+    FormularioLogin --> CuadroTexto
+    FormularioLogin --> Menu`,
+  proto: `classDiagram
+    direction LR
+    class Prototipo~T~{<<interface>> +copiar() T}
+    Prototipo <|.. Informe
+    Prototipo <|.. Seccion
+    Informe o-- Seccion
+    RegistroPlantillas o-- Informe : prototipos
+    RegistroPlantillas : +crear(nombre) Informe`,
+  singleton: `classDiagram
+    direction LR
+    class Configuracion{<<record>> +urlBaseDatos +maxConexiones +modoPruebas}
+    class ConfiguracionGlobal{<<enum singleton>> INSTANCIA +get() Configuracion}
+    ServicioReportes --> Configuracion : inyectada por constructor
+    ConfiguracionGlobal --> Configuracion`
+};
+let mermaidListo = false;
+async function dibujarUml() {
+  if (!window.mermaid) return;
+  if (!mermaidListo) {
+    const oscuro = matchMedia("(prefers-color-scheme: dark)").matches;
+    mermaid.initialize({ startOnLoad: false, theme: oscuro ? "dark" : "neutral", securityLevel: "strict" });
+    mermaidListo = true;
+  }
+  for (const el of document.querySelectorAll("section.pat.on .uml:not([data-ok])")) {
+    try {
+      const { svg } = await mermaid.render("uml-" + el.dataset.uml, uml[el.dataset.uml]);
+      el.innerHTML = svg; el.dataset.ok = "1";
+    } catch (e) { el.dataset.ok = "1"; }
+  }
+}
+window.addEventListener("load", dibujarUml);
+</script>
+</body>
+</html>
