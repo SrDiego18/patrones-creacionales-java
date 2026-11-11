@@ -39,6 +39,16 @@ javac -d out $(find src/main -name "*.java")
 java -cp out patrones.App
 ```
 
+## Capturas de ejecución
+
+**Pruebas (`mvn verify`, ejecución real en GitHub Actions):**
+
+![72 pruebas JUnit 5 pasan](capturas/02_pruebas_junit_72_ok.png)
+
+**Demostraciones de los cinco patrones (`java -cp target/classes patrones.App`):**
+
+![Demostración de los cinco patrones](capturas/01_demos_cinco_patrones.png)
+
 ## Diseño
 
 ### Factory Method (laboratorio)

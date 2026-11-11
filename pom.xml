@@ -61,6 +61,14 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+                <configuration>
+                    <!-- Las demos y el código original de referencia no son lógica a probar -->
+                    <excludes>
+                        <exclude>patrones/App.class</exclude>
+                        <exclude>patrones/**/Demo*.class</exclude>
+                        <exclude>patrones/factorymethod/antes/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
